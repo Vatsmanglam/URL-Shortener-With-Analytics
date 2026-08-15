@@ -1,11 +1,43 @@
-const { createShortUrl } = require("../services/url.service");
+const urlService = require("../services/url.service");
 
-const shortenUrl = (req, res) => {
-    const result = createShortUrl(req.body.url);
+const shortenUrl = async (req, res) => {
+    try {
+        const { url } = req.body;
 
-    res.json(result);
+        const result = await urlService.createShortUrl(url);
+
+        res.status(201).json({
+            message: "Short URL created successfully",
+            data: result,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
+
+const redirectToOriginalUrl = async (req, res) => {
+    try {
+        const { shortCode } = req.params;
+
+        const url = await urlService.getOriginalUrl(shortCode);
+
+        if (!url) {
+            return res.status(404).json({
+                message: "Short URL not found",
+            });
+        }
+
+        res.redirect(url.originalUrl);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
 };
 
 module.exports = {
-    shortenUrl
+    shortenUrl,
+    redirectToOriginalUrl,
 };
