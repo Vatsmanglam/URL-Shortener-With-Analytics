@@ -1,10 +1,22 @@
+
 const app = require("./app");
 const connectDB = require("./config/db");
+const { connectRedis } = require("./config/redis");
 
 const PORT = process.env.PORT || 3000;
 
-connectDB();
+const startServer = async () => {
+    try {
+        await connectDB();
+        await connectRedis();
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+        app.listen(PORT, () => {
+            console.log(`🚀 Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("❌ Server startup failed:", error.message);
+        process.exit(1);
+    }
+};
+
+startServer();
